@@ -15,12 +15,13 @@ module Thredded
     end
 
     config.to_prepare do
+      Rails.application.reload_routes!
+      Thredded::MainAppRouteDelegator.add_main_app_proxies
+      ::Thredded::ApplicationController.helper ::Thredded::MainAppRouteDelegator
+
       if Thredded.user_class
         Thredded.user_class.send(:include, Thredded::UserExtender)
       end
-
-      # Delegate all main_app routes to allow calling them directly.
-      ::Thredded::ApplicationController.helper ::Thredded::MainAppRouteDelegator
     end
 
     initializer 'thredded.setup_assets' do

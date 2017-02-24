@@ -4,7 +4,7 @@ require 'spec_helper'
 feature 'Logged in user' do
   let(:messageboard) { create(:messageboard) }
   let(:topic) do
-    topic = create(:topic, with_posts: 1, messageboard: messageboard)
+    topic = create(:topic, with_posts: 3, messageboard: messageboard)
     PageObject::Topic.new(topic)
   end
 

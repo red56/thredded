@@ -86,4 +86,33 @@ feature 'User views a topic' do
       end
     end
   end
+
+  context 'when viewing a topic for the first time' do
+    let(:unvisited_topic) do
+      create(:topic, messageboard: messageboard)
+    end
+
+    scenario 'are taken to topic path' do
+      visit thredded.messageboard_topic_path(messageboard, unvisited_topic)
+      expect(page.current_path).to eq thredded.messageboard_topic_path(messageboard, unvisited_topic)
+    end
+  end
+
+  context 'when viewing a topic which has already been read' do
+    let(:visited_topic) do
+      create(:topic, with_posts: 3, messageboard: messageboard)
+    end
+    let(:read_state) { create(:user_topic_read_state, postable: topic, user: user, read_at: visited_topic.last_post.created_at) }
+
+    scenario 'are taken to last post' do
+      visit thredded.messageboard_topic_path(messageboard, visited_topic)
+      expect(page.current_path).to eq thredded.messageboard_topic_path(messageboard, visited_topic, anchor: "post_#{visited_topic.last_post.id}")
+    end
+  end
+
+  context 'when viewing a topic with a post marked as unread' do
+    scenario 'are taken to the unread post' do
+
+    end
+  end
 end

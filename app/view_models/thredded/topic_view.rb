@@ -44,6 +44,15 @@ module Thredded
       @policy.moderate?
     end
 
+    def path
+      if @topic.first_unread_post
+        anchor = "post_#{@topic.first_unread_post.id}"
+      else
+        anchor = "post_#{@topic.last_post.id}" if @topic.last_post
+      end
+      Thredded::UrlsHelper.topic_path(@topic, page: @read_state.page, anchor: anchor)
+    end
+
     def edit_path
       Thredded::UrlsHelper.edit_messageboard_topic_path(@topic.messageboard, @topic)
     end

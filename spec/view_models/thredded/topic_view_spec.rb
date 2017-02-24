@@ -115,4 +115,52 @@ module Thredded
       expect(topic_view.states).to include :notfollowing
     end
   end
+
+  describe TopicView, '#path' do
+    let(:user) { create(:user) }
+    let(:messageboard) { create(:messageboard) }
+    let(:topic) do
+      create(:topic, messageboard: messageboard)
+    end
+    subject { TopicView.from_user(topic, create(:user)) }
+
+    context 'with an unviewed topic' do
+      it 'returns topic path' do
+        expect(subject.path).to eq "/thredded/#{topic.messageboard.slug}/#{topic.slug}"
+      end
+    end
+
+    context 'with a viewed topic' do
+      let(:post) {create(:post, postable: topic)}
+      let(:unread_post) {create(:post, postable: topic)}
+      let(:read_state) { create(:user_topic_read_state, postable: topic, user: user, read_at: post.created_at) }
+      before { allow(unread_post).to receive(:mark_as_unread).and_return(post) }
+      it 'returns topic path' do
+        expect(subject.path).to end_with("#post_#{post.id}")
+      end
+    end
+
+    context 'with a post marked as unread' do
+      let(:first_post) {create(:post, postable: topic)}
+      let(:second_post) {create(:post, postable: topic)}
+      let(:third_post) { create(:post, postable: topic) }
+
+      before do
+        travel_to 2.days.ago do
+          first_post
+        end
+        travel_to 1.day.ago do
+          second_post
+        end
+        travel_to 1.minute.ago do
+          third_post
+          second_post.mark_as_unread(user, 1)
+        end
+      end
+
+      it 'returns topic path' do
+        expect(subject.path).to end_with("#post_#{second_post.id}")
+      end
+    end
+  end
 end

@@ -114,6 +114,11 @@ feature 'User views a topic' do
         expect(page).not_to have_selector('article.thredded--read--post')
         expect(page).not_to have_selector('article.thredded--unread--post')
       end
+
+      scenario "the unread from here seperator doesn't display" do
+        topic_page.visit_topic
+        expect(page).not_to have_selector('#unread_from_here_seperator')
+      end
     end
 
     context 'when logged in' do
@@ -126,6 +131,11 @@ feature 'User views a topic' do
           topic_page.visit_topic
           expect(page).to have_selector('article.thredded--unread--post', count: 3)
         end
+
+        scenario "the unread from here seperator doesn't display" do
+          topic_page.visit_topic
+          expect(page).not_to have_selector('#unread_from_here_seperator')
+        end
       end
 
       context 'when viewing a fully read topic' do
@@ -134,16 +144,26 @@ feature 'User views a topic' do
           topic_page.visit_topic
           expect(page).to have_selector('article.thredded--read--post', count: 3)
         end
+
+        scenario "the unread from here seperator doesn't display" do
+          topic_page.visit_topic
+          expect(page).not_to have_selector('#unread_from_here_seperator')
+        end
       end
 
       context 'when viewing a part read topic' do
         let(:read_state) do
           create(:user_topic_read_state, postable: topic, user: user, read_at: second_post.created_at)
         end
-        scenario 'each post has a class of read' do
+        scenario 'each post has a class of read or unread' do
           topic_page.visit_topic
           expect(page).to have_selector('article.thredded--read--post', count: 2)
           expect(page).to have_selector('article.thredded--unread--post', count: 1)
+        end
+
+        scenario 'the unread from here seperator displays after last read post' do
+          topic_page.visit_topic
+          expect(page).to have_selector('#unread_from_here_seperator')
         end
       end
     end
